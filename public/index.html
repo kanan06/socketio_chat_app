@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <h1>Chatting</h1>
+    <input type="text" id="room" placeholder="Enter Room" />
+    <button id="joinBtn">Join Room</button>
+    <input type="text" id="message" placeholder="Enter Message" />
+    <button id="sendBtn">Send</button>
+    <div id="messages"></div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const socket = io(); // Create a socket connection
+            
+
+            const joinBtn = document.getElementById("joinBtn");
+            const sendBtn = document.getElementById("sendBtn");
+            const roomInput = document.getElementById("room");
+            const messageInput = document.getElementById("message");
+            const allMessages = document.getElementById('messages');
+
+            let currentRoom = '';
+
+            // joining a room
+            joinBtn.addEventListener('click', (e) => {
+                const room = roomInput.value;
+                if (room) {
+                    currentRoom = room;
+                    socket.emit('join-room', room);
+                    console.log(`Joined room: ${room}`);
+                }
+            });
+
+            // Handle incoming messages
+            socket.on('message', function(message) {
+                const p = document.createElement('p');
+                p.innerText = message;
+                allMessages.appendChild(p);
+            });
+
+            // Send a message when the send button is clicked
+            sendBtn.addEventListener('click', (e) => {
+                const message = messageInput.value;
+                if (currentRoom && message) {
+                    console.log(`Sending message: ${message} to room: ${currentRoom}`);
+                    socket.emit("user-message", { room: currentRoom, message }); // Send message to the room
+                }
+            });
+        });
+    </script>
+</body>
+</html>
